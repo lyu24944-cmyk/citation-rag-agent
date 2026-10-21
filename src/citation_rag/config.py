@@ -13,7 +13,10 @@ class Settings(BaseSettings):
     app_name: str = "citation-rag-agent"
     db_path: str | None = None
     top_k: int = 3
-    min_score: float = 0.15
+    # 句子嵌入的余弦分数。低于此值视为没有依据。
+    min_score: float = 0.50
+    # 只保留和最高分足够接近的块，避免「退款」顺手带上「冷静期」。
+    score_margin: float = 0.05
     chunk_size: int = 180
     chunk_overlap: int = 40
 

@@ -1,30 +1,41 @@
-"""确定性哈希向量。不下载模型，测试和演示都不需要 API Key。"""
+"""多语言句子嵌入。模型缓存在仓库 .data/models，下载一次后可离线加载。"""
 
 from __future__ import annotations
 
-import hashlib
 import math
+from pathlib import Path
 
-from citation_rag.text import tokenize
+MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
-DIM = 256
+_MODEL = None
+
+
+def model_cache_dir() -> Path:
+    """权重不入库。"""
+    path = Path(__file__).resolve().parents[2] / ".data" / "models"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def _get_model():
+    global _MODEL
+    if _MODEL is None:
+        from fastembed import TextEmbedding
+
+        _MODEL = TextEmbedding(MODEL_NAME, cache_dir=str(model_cache_dir()))
+    return _MODEL
 
 
 def embed(text: str) -> list[float]:
-    """把文本映到单位长度的稀疏向量。空文本得到零向量。"""
-    vector = [0.0] * DIM
-    tokens = tokenize(text)
-    if not tokens:
-        return vector
-    for token in tokens:
-        digest = hashlib.md5(token.encode("utf-8")).digest()
-        index = int.from_bytes(digest[:2], "little") % DIM
-        sign = 1.0 if digest[2] % 2 == 0 else -1.0
-        vector[index] += sign
-    norm = math.sqrt(sum(value * value for value in vector))
+    """返回单位向量。空文本得到空列表，调用方应视为没有检索结果。"""
+    raw = (text or "").strip()
+    if not raw:
+        return []
+    values = [float(item) for item in next(_get_model().embed([raw]))]
+    norm = math.sqrt(sum(value * value for value in values))
     if norm == 0:
-        return vector
-    return [value / norm for value in vector]
+        return []
+    return [value / norm for value in values]
 
 
 def cosine(left: list[float], right: list[float]) -> float:

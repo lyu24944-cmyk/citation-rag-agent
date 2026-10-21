@@ -33,6 +33,7 @@ def ask(
         text,
         top_k=top_k if top_k is not None else settings.top_k,
         min_score=settings.min_score if min_score is None else min_score,
+        score_margin=settings.score_margin,
     )
     if not hits:
         return AskResult(question=text, answer=ABSTAIN_ANSWER, citations=[], abstained=True)

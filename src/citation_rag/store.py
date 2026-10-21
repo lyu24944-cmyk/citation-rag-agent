@@ -64,7 +64,7 @@ class Store:
                     INSERT INTO chunks (chunk_id, doc_id, title, text, vector)
                     VALUES (?, ?, ?, ?, ?)
                     """,
-                    (chunk_id, doc_id, title, text, json.dumps(embed(text))),
+                    (chunk_id, doc_id, title, text, json.dumps(embed(f"{title}\n{text}"))),
                 )
         return len(chunks)
 
@@ -80,8 +80,14 @@ class Store:
             return None
         return ChunkHit(row["chunk_id"], row["doc_id"], row["title"], row["text"], 1.0)
 
-    def search(self, query: str, top_k: int, min_score: float) -> list[ChunkHit]:
-        """分数低于门槛的块不返回。空查询直接为空。"""
+    def search(
+        self,
+        query: str,
+        top_k: int,
+        min_score: float,
+        score_margin: float = 0.05,
+    ) -> list[ChunkHit]:
+        """低于门槛的块不返回。与最高分差距过大的块也不返回。"""
         query_vector = embed(query)
         if not any(query_vector):
             return []
@@ -96,4 +102,8 @@ class Store:
                 ChunkHit(row["chunk_id"], row["doc_id"], row["title"], row["text"], score)
             )
         hits.sort(key=lambda hit: (-hit.score, hit.chunk_id))
-        return hits[:top_k]
+        if not hits:
+            return []
+        best = hits[0].score
+        close = [hit for hit in hits if best - hit.score <= score_margin]
+        return close[:top_k]

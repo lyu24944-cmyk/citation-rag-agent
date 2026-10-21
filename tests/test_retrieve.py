@@ -31,6 +31,20 @@ def test_refund_question_cites_refund_doc(store: Store) -> None:
     assert any(item.doc_id == "doc-refund" for item in result.citations)
 
 
+def test_short_refund_does_not_cite_deletion(store: Store) -> None:
+    _load(store)
+    ingest(
+        DocumentIn(
+            doc_id="doc-delete",
+            title="账号注销",
+            body="注销需邮件确认，并有 7 天冷静期。",
+        ),
+        store,
+    )
+    result = ask("几天内可以退款", store)
+    assert [item.doc_id for item in result.citations] == ["doc-refund"]
+
+
 def test_password_question_cites_password_doc(store: Store) -> None:
     _load(store)
     result = ask("怎么重置密码？", store)
