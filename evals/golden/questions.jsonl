@@ -1,0 +1,6 @@
+{"id": "q-refund", "question": "订阅未使用，几天内可以退款？", "expect_doc_prefix": "doc-refund", "forbid_citations": false}
+{"id": "q-refund-short", "question": "几天内可以退款", "expect_doc_prefix": "doc-refund", "forbid_citations": false}
+{"id": "q-password", "question": "怎么重置密码？", "expect_doc_prefix": "doc-password", "forbid_citations": false}
+{"id": "q-delete", "question": "注销账号有冷静期吗？", "expect_doc_prefix": "doc-delete", "forbid_citations": false}
+{"id": "q-weather", "question": "今天天气怎么样", "expect_doc_prefix": null, "forbid_citations": true}
+{"id": "q-hi", "question": "hello just saying hi", "expect_doc_prefix": null, "forbid_citations": true}
